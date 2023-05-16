@@ -1,0 +1,162 @@
+/** The Packman game maker */
+
+class PackmanGame {
+    field Packman packman;
+    field Ghost ghost;
+    field int direction; // the square's current direction: 
+                         // 0=none, 1=up, 2=down, 3=left, 4=right
+    field int score; // counting the score
+
+    constructor PackmanGame new() {
+        let ghost = Ghost.new();
+        let packman = Packman.new(100, 104);
+        let direction = 0; //initial state is no movment
+        let score = 0; //initial score is 0
+
+        do Screen.setColor(true);
+        do Screen.drawLine(0,224,511,224);
+
+        do printScore();
+        return this;
+        }
+
+    /** Disposes this game. */
+   method void dispose() {
+      do packman.dispose();
+      do ghost.dispose();
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   /** Moves the square in the current direction. */
+   method void movePackman() {
+      if (direction = 1) { do packman.moveUp(); }
+      if (direction = 2) { do packman.moveDown(); }
+      if (direction = 3) { do packman.moveLeft(); }
+      if (direction = 4) { do packman.moveRight(); }
+      do Sys.wait(25);  // delays the next movement
+      return;
+   }
+
+   /** method that prints the score */
+   method void printScore(){
+        var String message1;
+        var String message2;
+        let message2 = "      q to Quit   ";
+        let message1 = "   The Mad Packman Game      The Score is : ";
+
+        do Output.moveCursor(21,0);
+        do Output.printString(message1);
+        do Output.printInt(score);
+        do Output.printString(message2);
+        return;
+   }
+
+   /**method that checks if the */
+   method void isCollided(){
+        var int ghostX,ghostY,packmanX,packmanY;
+        var int ghostXRT,ghostYRT;
+         var int ghostXLB,ghostYLB;
+         var int ghostXRB,ghostYRB;
+         var int packmanXRT,packmanYRT;
+         var int packmanXLB,packmanYLB;
+         var int packmanXRB,packmanYRB;
+         var boolean flag; 
+        let ghostX = ghost.getT();
+        let ghostY = ghost.getQ();
+        let packmanX = packman.getX();
+        let packmanY = packman.getY(); 
+        let ghostXRT = ghostX + 16; 
+        let ghostYRT = ghostY;
+        let ghostXLB = ghostX; 
+        let ghostYLB = ghostY+16; 
+        let ghostXRB = ghostX + 16 ; 
+        let ghostYRB = ghostY + 16; 
+        let packmanXRT = packmanX + 16; 
+        let packmanYRT = packmanY;
+        let packmanXLB = packmanX; 
+        let packmanYLB = packmanY+16; 
+        let packmanXRB = packmanX + 16; 
+        let packmanYRB = packmanY + 16;
+         let flag = false;
+      if ((ghostXRB > packmanX) & (ghostXRB <packmanXRT) & (ghostYRB > packmanY) & (ghostYRB<packmanYLB))
+      {
+         let flag = true; 
+      }
+
+            
+      if ((ghostXLB > packmanX) & (ghostXLB <packmanXRT) & (ghostYLB > packmanY) & (ghostYLB<packmanYLB))
+      {
+         let flag = true; 
+      }
+
+      if((ghostXRT> packmanX) &(ghostXRT < packmanXRT) & (ghostYRT >packmanY) & (ghostYRT < packmanYLB))
+      {
+         let flag = true; 
+      }
+
+      if((ghostX> packmanX) &(ghostX < packmanXRT) & (ghostY >packmanY) & (ghostY < packmanYLB))
+      {
+         let flag = true; 
+
+      }
+
+      if ((ghostX = packmanX) & (ghostY = packmanY)){
+         let flag = true;
+      }
+
+      if(flag){
+         let score = score + 1; 
+         do ghost.changeLocation();
+         do printScore();
+      }
+   return;
+   }
+
+   /** method that prints the screen of game ended */
+    method void endGameMsg(){
+        var String message1;
+
+        let message1 = "Game is Over ! Total Score - ";
+
+        do Screen.clearScreen();
+        do Output.moveCursor(10,20);
+        do Output.printString(message1);
+        do Output.printInt(score);
+        return;
+    }
+
+    /** Runs the game: handles the user's inputs and moves the square accordingly */
+   method void run() {
+      var char key;  // the key currently pressed by the user
+      var boolean exit;
+    
+      let exit = false;
+      
+      while (~exit) {
+         // waits for a key to be pressed
+         while (key = 0) {
+            let key = Keyboard.keyPressed();
+            do movePackman();
+            do isCollided();
+         }
+        
+         if (key = 81)  { let exit = true; }     // q key
+         if (key = 131) { let direction = 1; }   // up arrow
+         if (key = 133) { let direction = 2; }   // down arrow
+         if (key = 130) { let direction = 3; }   // left arrow
+         if (key = 132) { let direction = 4; }   // right arrow
+
+         // waits for the key to be released
+         while (~(key = 0)) {
+            let key = Keyboard.keyPressed();
+            do movePackman();
+            do isCollided();
+         }
+     } // while
+
+    do endGameMsg(); // prints the screen that the game ended
+
+     return;
+   }
+}

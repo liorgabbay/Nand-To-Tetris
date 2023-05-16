@@ -1,0 +1,123 @@
+
+class Packman {
+     field int x,y; //screen location of the Packman's top-left corner
+
+    /** Constructs a new Packman with given location and size. */
+    constructor Packman new (int Ax, int Ay) {
+        let x = Ax;
+        let y = Ay;
+        do draw();
+        return this;
+    }
+
+    /** Disposes this Packman. */
+   method void dispose() {
+      do Memory.deAlloc(this);
+      return;
+   }
+
+     /** method the return the location of the top left corner of packman */
+   method int getLocation() {
+     var int location;
+     let location = (y*32) + (x/16);
+     return location;
+   }
+     method int getX(){
+          return x; 
+     }
+
+     method int getY(){
+          return y; 
+     }
+   /** Draws the Packman on the screen. */
+   method void draw() {
+          var int memAddress;
+          var int location;
+          let location = (y*32) + (x/16);
+        do Screen.setColor(true);
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 4080);
+        do Memory.poke(memAddress+32, 8184);
+        do Memory.poke(memAddress+64, 4092);
+        do Memory.poke(memAddress+96, 2046);
+        do Memory.poke(memAddress+128, 1023);
+        do Memory.poke(memAddress+160, 511);
+        do Memory.poke(memAddress+192, 255);
+        do Memory.poke(memAddress+224, 127);
+        do Memory.poke(memAddress+256, 255);
+        do Memory.poke(memAddress+288, 511);
+        do Memory.poke(memAddress+320, 2046);
+        do Memory.poke(memAddress+352, 8190);
+        do Memory.poke(memAddress+384, 8188);
+        do Memory.poke(memAddress+416, 8184);
+        do Memory.poke(memAddress+448, 4080);
+        do Memory.poke(memAddress+480, 896);
+        return;
+    }
+
+   /** Erases the Packman from the screen. */
+   method void erase() {
+          var int memAddress;
+          var int location;
+          let location = (y*32) + (x/16);
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 0);
+	do Memory.poke(memAddress+32, 0);
+	do Memory.poke(memAddress+64, 0);
+	do Memory.poke(memAddress+96, 0);
+	do Memory.poke(memAddress+128, 0);
+	do Memory.poke(memAddress+160, 0);
+	do Memory.poke(memAddress+192, 0);
+	do Memory.poke(memAddress+224, 0);
+	do Memory.poke(memAddress+256, 0);
+	do Memory.poke(memAddress+288, 0);
+	do Memory.poke(memAddress+320, 0);
+	do Memory.poke(memAddress+352, 0);
+	do Memory.poke(memAddress+384, 0);
+	do Memory.poke(memAddress+416, 0);
+	do Memory.poke(memAddress+448, 0);
+	do Memory.poke(memAddress+480, 0);
+        return;
+   }
+
+     /** method that moves the packman up */
+     method void moveUp () {
+          if (y>7){
+               do erase();
+               let y = y-8;
+               do draw();
+          }
+          return;
+     }
+
+     /** method that moves the packman down */
+     method void moveDown () {
+          if (y < 201) {
+               do erase();
+               let y = y+8;
+               do draw();
+          }
+          return;
+     }
+
+     /** method that moves the packman right */
+     method void moveRight() {
+          if ( x < 496) {
+               do erase();
+               let x = x + 8;
+               do draw();
+          }
+          return;
+     }
+
+     /** method that moves the packman left */
+     method void moveLeft() {
+          if (x > 7) {
+               do erase();
+               let x = x - 8;
+               do draw();
+          }
+          return;
+     }
+
+}

@@ -1,0 +1,24 @@
+class Tuple{
+    field ind a,b;
+
+    constructor Tuple new(int x,int y){
+        let a = x; 
+        let b = y;
+        return this;
+    }
+    method int getA(){
+        return a;
+    }
+
+    method int getB(){
+        return b;
+    }
+
+    method void dispose(){
+        do Memory.deAlloc(this);
+        return;
+    }
+}
+
+
+

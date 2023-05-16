@@ -1,0 +1,156 @@
+class Ghost {
+
+   field int t,q; // screen location of the apple's top-left corner
+   field int cur_ind_location;
+   field Array places; 
+
+    /** the constructor of the Ghost */
+    constructor Ghost new() {
+        var Tuple tuple;
+        let places = Array.new(15);
+        let places[0] = Tuple.new(342,51);
+        let places[1] = Tuple.new(476,158);
+        let places[2] = Tuple.new(320,48);
+        let places[3] = Tuple.new(205,131);
+        let places[4] = Tuple.new(431,154);
+        let places[5] = Tuple.new(415,10);
+        let places[6] = Tuple.new(130,165);
+        let places[7] = Tuple.new(184,202);
+        let places[8] = Tuple.new(299,14);
+        let places[9] = Tuple.new(415,57);
+        let places[10] = Tuple.new(132,16);
+        let places[11] = Tuple.new(66,83);
+        let places[12] = Tuple.new(67,7);
+        let places[13] = Tuple.new(439,106);
+        let places[14] = Tuple.new(392,102);
+        let tuple = places[0];
+        let t = tuple.getA();
+        let q = tuple.getB();
+        let cur_ind_location = 0;
+        do draw();
+        return this;
+   }
+
+    /** method that returns the location of the ghost */
+    method int getLocation(){
+        var int location;
+        let location = (q*32) + (t/16);
+        return location;
+    }
+    
+    /** method that returns the X coordinate of the top left corner of the ghost */
+    method int getT()
+    {
+        return t; 
+    }
+
+    /** method that returns the Y coordinate of the top left corner of the ghost */
+    method int getQ()
+    {
+        return q; 
+    }
+
+    /** method that draws the ghost */
+    method void draw() {
+        var int memAddress;
+        var int location;
+        let location = (q*32) + (t/16);
+        let memAddress = 16384 + location;
+        do Memory.poke(memAddress+0, 2016);
+        do Memory.poke(memAddress+32, 4080);
+        do Memory.poke(memAddress+64, 8184);
+        do Memory.poke(memAddress+96, 16380);
+        do Memory.poke(memAddress+128, 16380);
+        do Memory.poke(memAddress+160, 16380);
+        do Memory.poke(memAddress+192, 14748);
+        do Memory.poke(memAddress+224, 31134);
+        do Memory.poke(memAddress+256, 32766);
+        do Memory.poke(memAddress+288, 32766);
+        do Memory.poke(memAddress+320, 32766);
+        do Memory.poke(memAddress+352, 32766);
+        do Memory.poke(memAddress+384, 30750);
+        do Memory.poke(memAddress+416, -1);
+        do Memory.poke(memAddress+448, -4421);
+        do Memory.poke(memAddress+480, -31727);
+        return;
+    }
+
+    /** method that dispose the object */
+    method void dispose() {
+        var Tuple tuple; 
+        let tuple = places[0];
+        do tuple.dispose();
+        let tuple = places[1];
+        do tuple.dispose();
+        let tuple = places[2];
+        do tuple.dispose();
+        let tuple = places[3];
+        do tuple.dispose();
+        let tuple = places[4];
+        do tuple.dispose();
+        let tuple = places[5];
+        do tuple.dispose();
+        let tuple = places[6];
+        do tuple.dispose();
+        let tuple = places[7];
+        do tuple.dispose();
+        let tuple = places[8];
+        do tuple.dispose();
+        let tuple = places[9];
+        do tuple.dispose();
+        let tuple = places[10];
+        do tuple.dispose();
+        let tuple = places[11];
+        do tuple.dispose();
+        let tuple = places[12];
+        do tuple.dispose();
+        let tuple = places[13];
+        do tuple.dispose();
+        let tuple = places[14];
+        do tuple.dispose();
+        do places.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** method that earse the ghost from the screen */
+    method void erase() {
+        var int memAddress;
+        var int location;
+        let location = (q*32) + (t/16);
+        let memAddress = 16384 + location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 0);
+        do Memory.poke(memAddress+64, 0);
+        do Memory.poke(memAddress+96, 0);
+        do Memory.poke(memAddress+128, 0);
+        do Memory.poke(memAddress+160, 0);
+        do Memory.poke(memAddress+192, 0);
+        do Memory.poke(memAddress+224, 0);
+        do Memory.poke(memAddress+256, 0);
+        do Memory.poke(memAddress+288, 0);
+        do Memory.poke(memAddress+320, 0);
+        do Memory.poke(memAddress+352, 0);
+        do Memory.poke(memAddress+384, 0);
+        do Memory.poke(memAddress+416, 0);
+        do Memory.poke(memAddress+448, 0);
+        do Memory.poke(memAddress+480, 0);
+        return;
+    }
+
+    /** method that change the location of the ghost */
+    method void changeLocation(){
+        var Tuple tuple;
+        do erase();
+        if ( cur_ind_location = 14) {
+            let cur_ind_location = 0;
+        }else{
+            let cur_ind_location = cur_ind_location + 1;
+        }
+       let tuple = places[cur_ind_location];
+       let t = tuple.getA();
+       let q = tuple.getB();
+        do draw();
+        return;
+    }
+}

@@ -1,0 +1,42 @@
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+
+// The ExtendAlu chip is an extension of the standard ALU which also supports
+// shift operations.
+// The inputs of the extended ALU are instruction[9], x[16], y[16].
+// The "ng" and "zr" output pins behave the same as in the regular ALU.
+// The "out" output is defined as follows:
+// If instruction[8]=1 and instruction[7]=1 the output is identical to the 
+// regular ALU, where:
+// instruction[5]=zx, instruction[4]=nx, ..., instruction[0]=no
+// Else, if instruction[8]=0 and instruction[7]=1, the output is a shift:
+// - If instruction[4] == 0, the input "y" will be shifted, otherwise "x".
+// - If instruction[5] == 0, the shift will be a right-shift, otherwise left.
+// - All other inputs are undefined.
+
+CHIP ExtendAlu {
+     IN x[16], y[16], instruction[9];
+     OUT out[16], zr, ng;
+     
+     PARTS:
+     // Put your code here:
+     ALU(x=x,y=y,zx=instruction[5],nx=instruction[4],zy=instruction[3],ny=instruction[2],f=instruction[1],
+     no=instruction[0],out=aluout,zr=aluzr,ng=alung);
+     ShiftLeft(in=x,out=shiftleftx);
+     ShiftLeft(in=y,out=shiftlefty);
+     ShiftRight(in=x,out=shiftrightx);
+     ShiftRight(in=y,out=shiftrighty);
+     Mux16(a=shiftlefty,b=shiftleftx,sel=instruction[4],out=shiftleft);
+     Mux16(a=shiftrighty,b=shiftrightx,sel=instruction[4],out=shiftright);
+     Mux16(a=shiftright,b=shiftleft,sel=instruction[5],out=shift);
+     Mux4Way16(a=false,b=shift,c=false,d=aluout,sel=instruction[7..8],out=finalout,out[0..7]=final1,out[8..15]=final2,out[15]=sign,out=out);
+    Or8Way(in=final1,out=res1);
+    Or8Way(in=final2,out=res2);
+    Or(a=res1,b=res2,out=res);
+    Not(in=res,out=zr);
+    And(a=true,b=sign,out=ng);
+}

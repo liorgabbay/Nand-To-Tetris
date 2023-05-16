@@ -1,0 +1,70 @@
+// This file is part of nand2tetris, as taught in The Hebrew University, and
+// was written by Aviv Yaish. It is an extension to the specifications given
+// [here](https://www.nand2tetris.org) (Shimon Schocken and Noam Nisan, 2017),
+// as allowed by the Creative Common Attribution-NonCommercial-ShareAlike 3.0
+// Unported [License](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+// This chip is an extension of the regular CPU that uses the extended ALU.
+// If instruction[15]==0 or (instruction[14]==1 and instruction[13]==1),
+// then CpuMul behaves exactly the same as the regular CPU.
+// If instruction[15]==1 and instruction[14]==0 the chip will behave as follows:
+// | Instruction           | 15 | 14 | 13 | a | c1 | c2 | c3 | c4 | c5 | c6 |
+// |-----------------------|:--:|:--:|:--:|:-:|:--:|:--:|:--:|:--:|:--:|:--:|
+// | Regular a-instruction |  0 |  * |  * | * |  * |  * |  * |  * |  * |  * |
+// | Regular c-instruction |  1 |  1 |  1 | * |  * |  * |  * |  * |  * |  * |
+// | dest=A<<;jump         |  1 |  0 |  1 | 0 |  1 |  0 |  0 |  0 |  0 |  0 |
+// | dest=D<<;jump         |  1 |  0 |  1 | 0 |  1 |  1 |  0 |  0 |  0 |  0 |
+// | dest=M<<;jump         |  1 |  0 |  1 | 1 |  1 |  0 |  0 |  0 |  0 |  0 |
+// | dest=A>>;jump         |  1 |  0 |  1 | 0 |  0 |  0 |  0 |  0 |  0 |  0 |
+// | dest=D>>;jump         |  1 |  0 |  1 | 0 |  0 |  1 |  0 |  0 |  0 |  0 |
+// | dest=M>>;jump         |  1 |  0 |  1 | 1 |  0 |  0 |  0 |  0 |  0 |  0 |
+// Where:
+// - "<<" is a left shift, and ">>" is a right shift, as defined in project 2.
+//   These notations were chosen because they are used in real programming
+//   languages.
+// - dest and jump can take the same values as in the regular CPU.
+
+CHIP CpuMul {
+    IN  
+        inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset=1) or continue executing
+                         // the current program (reset=0).
+    OUT 
+        outM[16],        // M value output
+        writeM,          // Write into M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+    
+    PARTS:
+    // Put your code here:
+
+    Mux16(a=instruction,b=aluoutput ,sel=instruction[15],out=mux1out);
+    Mux(a=true,b=instruction[5],sel=instruction[15],out=aregisterc);
+    ARegister(in=mux1out,load=aregisterc,out[0..14]=addressM,out=aregister);
+    And(a=instruction[12],b=instruction[15],out=mux16sel);
+    Mux16(a=aregister,b=inM,sel=mux16sel,out=mux2out);
+    And(a=instruction[4],b=instruction[15],out=dregisterload);
+    DRegister(in=aluoutput,load=dregisterload,out=dregister);
+    ExtendAlu(x=dregister,y=mux2out,instruction=instruction[6..14],zr=zralu,ng=ngalu,out=aluoutput,out=outM);
+    And(a=instruction[3],b=instruction[15],out=writeM);
+    DMux8Way(in=true,sel=instruction[0..2],a=admux,b=bdmux,c=cdmux,d=ddmux,e=edmux,f=fdmux,g=gdmux,h=hdmux);
+    And(a=zralu,b=ngalu,out=zrandng);
+    Or(a=zralu,b=ngalu,out=zrorng);
+    Not(in=zrandng,out=notzrandng);
+    Not(in=ngalu,out=notng);
+    Not(in=zralu,out=notzr);
+    And(a=notng,b=zralu,out=notngandzr);
+    And(a=notng,b=notzr,out=notzrandnotng);
+    And(a=bdmux,b=notzrandnotng,out=jgt);
+    And(a=cdmux,b=zralu,out=jeq);
+    And(a=ddmux,b=notng,out=jge);
+    And(a=ngalu,b=edmux,out=jlt);
+    And(a=notzr,b=fdmux,out=jne);
+    And(a=zrorng,b=gdmux,out=jle);
+    Or8Way(in[0]=jgt,in[1]=jeq,in[2]=jge,in[3]=jlt,in[4]=jne,in[5]=jle,in[6]=hdmux,in[7]=false,out=jump);
+    And(a=jump,b=instruction[15],out=load1);
+    PC(in=aregister,load=load1,inc=true,reset=reset,out[0..14]=pc);
+
+}
